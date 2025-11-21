@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Masjid Display</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f2f1e6;
+      color: #582f0c;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* LEFT SIDE: MASJID + PRAYER TIMES */
+
+    .left {
+      width: 35%;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #f2f1e6;
+      border-right: 1px solid rgba(51, 65, 85, 0.7);
+    }
+
+    .header-block {
+      margin-bottom: 20px;
+    }
+
+    .masjid-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #000000;
+    }
+
+    .masjid-tagline {
+      font-size: 0.9rem;
+      color: #000000;
+      margin-top: 4px;
+    }
+
+    .date-time {
+      margin-top: 16px;
+      font-size: 1rem;
+      color: #000000;
+    }
+
+    .prayer-card {
+      margin-top: 24px;
+      padding: 16px 14px;
+      border-radius: 18px;
+      background: #f2f1e6;
+      box-shadow: 0 14px 40px rgba(88,47,12,0.25);
+    }
+
+    .widget-box {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #f2f1e6;
+      box-shadow: 0 8px 24px rgba(88,47,12,0.18);
+      min-height: 40px;
+    }
+
+    .prayer-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #000000;
+    }
+
+    .method-text {
+      font-size: 0.8rem;
+      color: #000000;
+      margin-bottom: 12px;
+    }
+
+    .next-badge {
+      font-size: 0.7rem;
+      color: #000000;
+      border-radius: 999px;
+      border: 1px solid #582f0c;
+      padding: 2px 8px;
+      display: inline-block;
+      box-shadow: 0 0 18px #582f0c;
+    }
+
+    .prayer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .prayer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      font-size: 0.95rem;
+      color: #000000;
+    }
+
+    .prayer-row-label {
+      font-weight: 500;
+    }
+
+    .prayer-row-time {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prayer-row.next {
+      background: #f2f1e6;
+      border-color: #582f0c;
+      box-shadow: 0 0 25px #582f0c;
+    }
+
+    .footer {
+      font-size: 0.75rem;
+      color: #000000;
+    }
+
+    /* RIGHT SIDE: SLIDESHOW */
+
+    .right {
+      width: 65%;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f2f1e6;
+      position: relative;
+    }
+
+    .slide-frame {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 26px;
+      overflow: hidden;
+      background: #f2f1e6;
+      box-shadow: 0 18px 50px rgba(88,47,12,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 0.6s ease-in-out;
+      opacity: 1;
+    }
+
+    .slide-frame img.fade-out {
+      opacity: 0;
+    }
+
+    .slide-dots {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid #582f0c;
+      background: transparent;
+    }
+
+    .dot.active {
+      background: #582f0c;
+      border-color: #582f0c;
+    }
+
+    @media (max-width: 900px) {
+      .screen {
+        flex-direction: column;
+      }
+      .left, .right {
+        width: 100%;
+        height: 50vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <!-- LEFT PANEL -->
+    <div class="left">
+      <div>
+        <div class="header-block">
+          <div class="masjid-name" id="masjidName">Masjid An Nur</div>
+          <div class="masjid-tagline">Prayer Times</div>
+          <div class="date-time" id="dateTime"></div>
+        </div>
+
+        <div class="prayer-card">
+          <div class="prayer-card-title">
+            <span>Today's Prayer Times</span>
+            <span class="next-badge" id="nextPrayerBadge">Loading...</span>
+          </div>
+          <div class="method-text" id="methodText">Loading prayer times…</div>
+          <div class="prayer-list" id="prayerList">
+            <!-- Filled by JavaScript -->
+          </div>
+        </div>
+        <div class="widget-box" id="widgetBox">
+          <script src="https://elfsightcdn.com/platform.js" async></script>
+          <div class="elfsight-app-31b6dba2-4204-4c82-9684-360ebc57032b" data-elfsight-app-lazy></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Display managed by Masjid An Nur
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right">
+      <div class="slide-frame">
+        <img id="slideImage" src="" alt="Masjid announcement slide" />
+      </div>
+      <div class="slide-dots" id="slideDots"></div>
+    </div>
+  </div>
+
+  <script>
+    /****************************************
+     * CONFIGURATION
+     ****************************************/
+
+    // Change these to your own details
+    const MASJID_NAME = "Masjid An Nur";
+    const CITY = "Lithonia";
+    const COUNTRY = "United States";
+    // 2 = ISNA (common for North America). Change if your masjid uses a different method.
+    const CALC_METHOD = 2;
+
+    // Slides folder and files (relative to this HTML file)
+   const SLIDES = [
+  "slides/slide1.jpg",
+  "slides/slide2.jpg",
+  "slides/slide3.jpg",
+  "slides/slide4.jpg",
+  "slides/slide5.jpg",
+  "slides/slide6.jpg",
+  "slides/slide7.jpg"
+      // Add more file paths here
+    ];
+
+    // Time each slide is shown (in milliseconds)
+    const SLIDE_DURATION = 20000; // 20 seconds
+
+    /****************************************
+     * CLOCK (DATE + TIME)
+     ****************************************/
+
+    function updateClock() {
+      const now = new Date();
+
+      const dateOptions = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      };
+      const timeOptions = {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      };
+
+      const dateStr = now.toLocaleDateString(undefined, dateOptions);
+      const timeStr = now.toLocaleTimeString(undefined, timeOptions);
+
+      const dateTimeEl = document.getElementById("dateTime");
+      dateTimeEl.textContent = `${dateStr} • ${timeStr}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /****************************************
+     * PRAYER TIMES
+     ****************************************/
+
+    // Convert "HH:MM" (24‑hour) → "h:MM AM/PM"
+    function to12Hour(timeStr) {
+      const [hour, minute] = timeStr.split(":").map(Number);
+      const suffix = hour >= 12 ? "PM" : "AM";
+      const h12 = hour % 12 || 12;
+      return `${h12}:${minute.toString().padStart(2,"0")} ${suffix}`;
+    }
+
+    let prayerSchedule = []; // Will store today's prayers as Date objects
+
+    async function loadPrayerTimes() {
+      const methodText = document.getElementById("methodText");
+      const listEl = document.getElementById("prayerList");
+      const badgeEl = document.getElementById("nextPrayerBadge");
+
+      try {
+        methodText.textContent = "Loading prayer times…";
+        listEl.innerHTML = "";
+
+        const url =
+          "https://api.aladhan.com/v1/timingsByCity?city=" +
+          encodeURIComponent(CITY) +
+          "&country=" +
+          encodeURIComponent(COUNTRY) +
+          "&method=" +
+          CALC_METHOD;
+
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.code !== 200) {
+          methodText.textContent = "Error loading prayer times.";
+          badgeEl.textContent = "Error";
+          return;
+        }
+
+        const data = json.data;
+        const timings = data.timings;
+        const methodName = data.meta.method.name;
+
+        methodText.textContent = `${CITY}, ${COUNTRY} • ${methodName}`;
+
+        // Define which prayers to show and in what order
+        const prayersToShow = [
+          "Fajr",
+          "Sunrise",
+          "Dhuhr",
+          "Asr",
+          "Maghrib",
+          "Isha"
+        ];
+
+        const now = new Date();
+        prayerSchedule = [];
+
+        prayersToShow.forEach((name) => {
+          const timeStr = timings[name]; // e.g. "05:34"
+          if (!timeStr) return;
+
+          const [hour, minute] = timeStr.split(":").map(Number);
+          const dt = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            hour,
+            minute
+          );
+
+          prayerSchedule.push({
+            name,
+            timeStr,
+            date: dt
+          });
+        });
+
+        // Render rows
+        listEl.innerHTML = "";
+        prayerSchedule.forEach((p) => {
+          const row = document.createElement("div");
+          row.className = "prayer-row";
+
+          const label = document.createElement("div");
+          label.className = "prayer-row-label";
+          label.textContent = p.name;
+
+          const time = document.createElement("div");
+          time.className = "prayer-row-time";
+          time.textContent = to12Hour(p.timeStr);
+
+          row.appendChild(label);
+          row.appendChild(time);
+          listEl.appendChild(row);
+        });
+
+        // Highlight next prayer once now; then keep updating
+        updateNextPrayerHighlight();
+      } catch (err) {
+        console.error(err);
+        methodText.textContent = "Failed to load prayer times.";
+        badgeEl.textContent = "Error";
+      }
+    }
+
+    function updateNextPrayerHighlight() {
+      if (!prayerSchedule || prayerSchedule.length === 0) return;
+
+      const now = new Date();
+      let nextPrayer = null;
+
+      for (const p of prayerSchedule) {
+        if (p.date > now) {
+          nextPrayer = p;
+          break;
+        }
+      }
+
+      // If all prayers are past, consider the first prayer as the "next" (for the next day)
+      if (!nextPrayer) {
+        nextPrayer = prayerSchedule[0];
+      }
+
+      // Remove old highlight
+      const rows = document.querySelectorAll(".prayer-row");
+      rows.forEach((row) => row.classList.remove("next"));
+
+      // Add highlight to the matching row
+      const badgeEl = document.getElementById("nextPrayerBadge");
+      badgeEl.textContent = `Next: ${nextPrayer.name} at ${to12Hour(nextPrayer.timeStr)}`;
+
+      rows.forEach((row) => {
+        const label = row.querySelector(".prayer-row-label");
+        if (label && label.textContent === nextPrayer.name) {
+          row.classList.add("next");
+        }
+      });
+    }
+
+    // Load once on page load
+    loadPrayerTimes();
+    // Refresh times every 6 hours (more than enough)
+    setInterval(loadPrayerTimes, 6 * 60 * 60 * 1000);
+    // Update highlight every 30 seconds
+    setInterval(updateNextPrayerHighlight, 30 * 1000);
+
+    /****************************************
+     * SLIDESHOW
+     ****************************************/
+
+    let currentSlideIndex = 0;
+    const slideImageEl = document.getElementById("slideImage");
+    const dotsContainer = document.getElementById("slideDots");
+
+    function initSlideshow() {
+      if (!SLIDES || SLIDES.length === 0) {
+        slideImageEl.alt = "No slides configured";
+        return;
+      }
+
+      // Create dots
+      dotsContainer.innerHTML = "";
+      SLIDES.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (index === 0 ? " active" : "");
+        dotsContainer.appendChild(dot);
+      });
+
+      // Show first slide
+      slideImageEl.src = SLIDES[0];
+    }
+
+    function showSlide(nextIndex) {
+      if (!SLIDES || SLIDES.length === 0) return;
+
+      currentSlideIndex =
+        (nextIndex + SLIDES.length) % SLIDES.length;
+
+      // Fade effect
+      slideImageEl.classList.add("fade-out");
+      setTimeout(() => {
+        slideImageEl.src = SLIDES[currentSlideIndex];
+        slideImageEl.classList.remove("fade-out");
+        updateDots();
+      }, 300);
+    }
+
+    function updateDots() {
+      const dots = dotsContainer.querySelectorAll(".dot");
+      dots.forEach((dot, index) => {
+        dot.classList.toggle("active", index === currentSlideIndex);
+      });
+    }
+
+    function startSlideshow() {
+      if (!SLIDES || SLIDES.length === 0) return;
+      initSlideshow();
+      setInterval(() => {
+        showSlide(currentSlideIndex + 1);
+      }, SLIDE_DURATION);
+    }
+
+    // Set masjid name from config
+    document.getElementById("masjidName").textContent = MASJID_NAME;
+
+    // Start slideshow
+    startSlideshow();
+  </script>
+</body>
+</html>
