@@ -30,7 +30,7 @@
 
     .left {
       width: 35%;
-      padding: 20px 24px;
+      padding: 36px 40px 40px 40px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -43,7 +43,7 @@
     }
 
     .masjid-name {
-      font-size: 1.8rem;
+      font-size: 2.2rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -51,14 +51,21 @@
     }
 
     .masjid-tagline {
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       color: #000000;
       margin-top: 4px;
     }
 
     .date-time {
       margin-top: 16px;
-      font-size: 1rem;
+      font-size: 1.35rem;
+      color: #000000;
+    }
+
+    .hijri-date {
+      margin-top: 4px;
+      font-size: 1.1rem;
+      font-style: italic;
       color: #000000;
     }
 
@@ -71,26 +78,27 @@
     }
 
     .widget-box {
-      margin-top: 16px;
-      padding: 10px 12px;
-      border-radius: 14px;
+      margin-top: 10px;
+      padding: 6px;
+      border-radius: 10px;
       background: #f2f1e6;
-      box-shadow: 0 8px 24px rgba(88,47,12,0.18);
-      min-height: 40px;
+      box-shadow: 0 4px 12px rgba(88,47,12,0.12);
+      max-height: 200px;
+      overflow: hidden;
     }
 
     .prayer-card-title {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.4rem;
+      font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       color: #000000;
     }
 
     .method-text {
-      font-size: 0.8rem;
+      font-size: 1rem;
       color: #000000;
       margin-bottom: 12px;
     }
@@ -115,20 +123,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 9px;
+      padding: 14px 16px;
       border-radius: 10px;
       background: #f2f1e6;
       border: 1px solid #582f0c;
-      font-size: 0.95rem;
+      font-size: 1.35rem;
       color: #000000;
     }
 
     .prayer-row-label {
-      font-weight: 500;
+      font-weight: 700;
+      font-size: 1.35rem;
     }
 
     .prayer-row-time {
       font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.35rem;
     }
 
     .prayer-row.next {
@@ -138,7 +149,7 @@
     }
 
     .footer {
-      font-size: 0.75rem;
+      font-size: 1rem;
       color: #000000;
     }
 
@@ -148,17 +159,43 @@
       width: 65%;
       padding: 20px 24px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
       background: #f2f1e6;
       position: relative;
     }
 
+    .quran-widget {
+      padding: 8px 12px;
+      border-radius: 16px;
+      background: #f2f1e6;
+      box-shadow: 0 8px 24px rgba(88,47,12,0.18);
+      border: 1px solid #582f0c;
+    }
+
+    .quran-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .quran-ayah {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .quran-ref {
+      font-size: 0.8rem;
+      color: #555555;
+    }
+
     .slide-frame {
       width: 100%;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
+      flex: 1;
+      margin-top: 10px;
+      margin-bottom: 10px;
       border-radius: 26px;
       overflow: hidden;
       background: #f2f1e6;
@@ -171,7 +208,7 @@
     .slide-frame img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       transition: opacity 0.6s ease-in-out;
       opacity: 1;
     }
@@ -222,6 +259,7 @@
           <div class="masjid-name" id="masjidName">Masjid An Nur</div>
           <div class="masjid-tagline">Prayer Times</div>
           <div class="date-time" id="dateTime"></div>
+          <div class="hijri-date" id="hijriDate"></div>
         </div>
 
         <div class="prayer-card">
@@ -234,10 +272,6 @@
             <!-- Filled by JavaScript -->
           </div>
         </div>
-        <div class="widget-box" id="widgetBox">
-          <script src="https://elfsightcdn.com/platform.js" async></script>
-          <div class="elfsight-app-31b6dba2-4204-4c82-9684-360ebc57032b" data-elfsight-app-lazy></div>
-        </div>
       </div>
 
       <div class="footer">
@@ -247,10 +281,19 @@
 
     <!-- RIGHT PANEL -->
     <div class="right">
+      <div class="quran-widget">
+        <div class="quran-label">Qur'an Reminder</div>
+        <div class="quran-ayah" id="quranAyah"></div>
+        <div class="quran-ref" id="quranRef"></div>
+      </div>
       <div class="slide-frame">
         <img id="slideImage" src="" alt="Masjid announcement slide" />
       </div>
       <div class="slide-dots" id="slideDots"></div>
+      <div class="widget-box" id="widgetBox">
+        <script src="https://elfsightcdn.com/platform.js" async></script>
+        <div class="elfsight-app-31b6dba2-4204-4c82-9684-360ebc57032b" data-elfsight-app-lazy></div>
+      </div>
     </div>
   </div>
 
@@ -280,6 +323,26 @@
 
     // Time each slide is shown (in milliseconds)
     const SLIDE_DURATION = 20000; // 20 seconds
+
+    // Qur'an verses to rotate through on the right panel
+    const QURAN_VERSES = [
+      {
+        text: "Indeed, in the remembrance of Allah do hearts find rest.",
+        ref: "Surah Ar-Ra'd 13:28"
+      },
+      {
+        text: "So remember Me; I will remember you. And be grateful to Me and do not deny Me.",
+        ref: "Surah Al-Baqarah 2:152"
+      },
+      {
+        text: "And whoever relies upon Allah - then He is sufficient for him.",
+        ref: "Surah At-Talaq 65:3"
+      },
+      {
+        text: "So which of the favors of your Lord would you deny?",
+        ref: "Surah Ar-Rahman 55:13"
+      }
+    ];
 
     /****************************************
      * CLOCK (DATE + TIME)
@@ -355,6 +418,13 @@
         const methodName = data.meta.method.name;
 
         methodText.textContent = `${CITY}, ${COUNTRY} • ${methodName}`;
+
+        // Set Hijri date under the main date/time
+        const hijri = data.date && data.date.hijri;
+        const hijriEl = document.getElementById("hijriDate");
+        if (hijri && hijriEl) {
+          hijriEl.textContent = `${hijri.day} ${hijri.month.en} ${hijri.year} AH`;
+        }
 
         // Define which prayers to show and in what order
         const prayersToShow = [
@@ -514,11 +584,35 @@
       }, SLIDE_DURATION);
     }
 
+    function initQuranWidget() {
+      const ayahEl = document.getElementById("quranAyah");
+      const refEl = document.getElementById("quranRef");
+      if (!ayahEl || !refEl || !QURAN_VERSES.length) return;
+
+      let index = 0;
+
+      function showVerse(i) {
+        const verse = QURAN_VERSES[i];
+        ayahEl.textContent = verse.text;
+        refEl.textContent = verse.ref;
+      }
+
+      showVerse(index);
+
+      setInterval(() => {
+        index = (index + 1) % QURAN_VERSES.length;
+        showVerse(index);
+      }, 20000); // change verse every 20 seconds
+    }
+
     // Set masjid name from config
     document.getElementById("masjidName").textContent = MASJID_NAME;
 
     // Start slideshow
     startSlideshow();
+
+    // Start rotating Qur'an verses
+    initQuranWidget();
   </script>
 </body>
 </html>
