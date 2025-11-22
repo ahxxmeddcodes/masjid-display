@@ -145,7 +145,37 @@
     .prayer-row.next {
       background: #f2f1e6;
       border-color: #582f0c;
-      box-shadow: 0 0 25px #582f0c;
+    }
+
+    .next-prayer-panel {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      box-shadow: 0 0 22px #582f0c;
+    }
+
+    .next-prayer-label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #000000;
+    }
+
+    .next-prayer-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .iqamah-label {
+      font-size: 0.7em;
+      font-weight: 500;
+      display: block;
+      margin-top: 2px;
     }
 
     .footer {
@@ -164,13 +194,13 @@
       position: relative;
     }
 
-    .quran-widget {
-      padding: 8px 12px;
-      border-radius: 16px;
-      background: #f2f1e6;
-      box-shadow: 0 8px 24px rgba(88,47,12,0.18);
-      border: 1px solid #582f0c;
-    }
+   .quran-widget {
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: #f2f1e6;
+  border: 1px solid #582f0c;
+  box-shadow: 0 0 22px #582f0c;
+} 
 
     .quran-label {
       font-size: 0.85rem;
@@ -265,12 +295,16 @@
         <div class="prayer-card">
           <div class="prayer-card-title">
             <span>Today's Prayer Times</span>
-            <span class="next-badge" id="nextPrayerBadge">Loading...</span>
           </div>
           <div class="method-text" id="methodText">Loading prayer times…</div>
           <div class="prayer-list" id="prayerList">
             <!-- Filled by JavaScript -->
           </div>
+        </div>
+
+        <div class="next-prayer-panel">
+          <div class="next-prayer-label">Next Prayer</div>
+          <div class="next-prayer-text" id="nextPrayerPanel">Loading...</div>
         </div>
       </div>
 
@@ -469,12 +503,21 @@
       return `${h12}:${minute.toString().padStart(2,"0")} ${suffix}`;
     }
 
+    // Add minutes to a "HH:MM" time string (24-hour) and return new "HH:MM"
+    function addMinutesToTime(timeStr, minutesToAdd) {
+      const [hour, minute] = timeStr.split(":").map(Number);
+      const baseDate = new Date(2000, 0, 1, hour, minute);
+      baseDate.setMinutes(baseDate.getMinutes() + minutesToAdd);
+      const newHour = baseDate.getHours();
+      const newMinute = baseDate.getMinutes();
+      return `${String(newHour).padStart(2, "0")}:${String(newMinute).padStart(2, "0")}`;
+    }
+
     let prayerSchedule = []; // Will store today's prayers as Date objects
 
     async function loadPrayerTimes() {
       const methodText = document.getElementById("methodText");
       const listEl = document.getElementById("prayerList");
-      const badgeEl = document.getElementById("nextPrayerBadge");
 
       try {
         methodText.textContent = "Loading prayer times…";
@@ -493,15 +536,14 @@
 
         if (json.code !== 200) {
           methodText.textContent = "Error loading prayer times.";
-          badgeEl.textContent = "Error";
           return;
         }
 
         const data = json.data;
         const timings = data.timings;
-        const methodName = data.meta.method.name;
 
-        methodText.textContent = `${CITY}, ${COUNTRY} • ${methodName}`;
+        // Hide location and calculation method in the UI
+        methodText.textContent = "";
 
         // Set Hijri date under the main date/time
         const hijri = data.date && data.date.hijri;
@@ -555,7 +597,24 @@
 
           const time = document.createElement("div");
           time.className = "prayer-row-time";
-          time.textContent = to12Hour(p.timeStr);
+
+          // Base adhan time (converted to 12-hour)
+          const adhan12 = to12Hour(p.timeStr);
+
+          // Compute iqamah time: +15 mins for all except Maghrib, which is +2 mins.
+          let iqamahText = "";
+          if (["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(p.name)) {
+            const offset = p.name === "Maghrib" ? 2 : 15;
+            const iqamah24 = addMinutesToTime(p.timeStr, offset);
+            const iqamah12 = to12Hour(iqamah24);
+            iqamahText = `Iqamah ${iqamah12}`;
+          }
+
+          if (iqamahText) {
+            time.innerHTML = `${adhan12}<br><span class="iqamah-label">${iqamahText}</span>`;
+          } else {
+            time.textContent = adhan12;
+          }
 
           row.appendChild(label);
           row.appendChild(time);
@@ -567,43 +626,76 @@
       } catch (err) {
         console.error(err);
         methodText.textContent = "Failed to load prayer times.";
-        badgeEl.textContent = "Error";
       }
     }
 
     function updateNextPrayerHighlight() {
-      if (!prayerSchedule || prayerSchedule.length === 0) return;
+  if (!prayerSchedule || prayerSchedule.length === 0) return;
 
-      const now = new Date();
-      let nextPrayer = null;
+  const now = new Date();
+  const THIRTY_MIN = 30 * 60 * 1000;
+  let nextPrayer = null;
 
-      for (const p of prayerSchedule) {
-        if (p.date > now) {
-          nextPrayer = p;
-          break;
-        }
-      }
-
-      // If all prayers are past, consider the first prayer as the "next" (for the next day)
-      if (!nextPrayer) {
-        nextPrayer = prayerSchedule[0];
-      }
-
-      // Remove old highlight
-      const rows = document.querySelectorAll(".prayer-row");
-      rows.forEach((row) => row.classList.remove("next"));
-
-      // Add highlight to the matching row
-      const badgeEl = document.getElementById("nextPrayerBadge");
-      badgeEl.textContent = `Next: ${nextPrayer.name} at ${to12Hour(nextPrayer.timeStr)}`;
-
-      rows.forEach((row) => {
-        const label = row.querySelector(".prayer-row-label");
-        if (label && label.textContent === nextPrayer.name) {
-          row.classList.add("next");
-        }
-      });
+  // Determine the next upcoming prayer
+  for (const p of prayerSchedule) {
+    if (p.date > now) {
+      nextPrayer = p;
+      break;
     }
+  }
+
+  // If all prayers are past, consider the first prayer as the "next" (for the next day)
+  if (!nextPrayer) {
+    nextPrayer = prayerSchedule[0];
+  }
+
+  const rows = document.querySelectorAll(".prayer-row");
+
+  // Remove old highlights
+  rows.forEach((row) => {
+    row.classList.remove("next");
+    row.classList.remove("current-glow");
+  });
+
+  // Add "next" border highlight to the upcoming prayer
+  rows.forEach((row) => {
+    const label = row.querySelector(".prayer-row-label");
+    if (label && label.textContent === nextPrayer.name) {
+      row.classList.add("next");
+    }
+  });
+
+  // Add glow to the CURRENT prayer (±30 min window)
+  rows.forEach((row, index) => {
+    const p = prayerSchedule[index];
+    if (!p) return;
+    const diff = now - p.date; // positive if now is after prayer time
+    if (Math.abs(diff) <= THIRTY_MIN) {
+      row.classList.add("current-glow");
+    }
+  });
+
+  // Update the next prayer panel at the bottom
+  const nextPanel = document.getElementById("nextPrayerPanel");
+  if (nextPanel) {
+    const adhan12 = to12Hour(nextPrayer.timeStr);
+
+    // Compute iqamah time: +15 mins for all except Maghrib, which is +2 mins.
+    let iqamahText = "";
+    if (["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(nextPrayer.name)) {
+      const offset = nextPrayer.name === "Maghrib" ? 2 : 15;
+      const iqamah24 = addMinutesToTime(nextPrayer.timeStr, offset);
+      const iqamah12 = to12Hour(iqamah24);
+      iqamahText = `Iqamah ${iqamah12}`;
+    }
+
+    if (iqamahText) {
+      nextPanel.innerHTML = `${nextPrayer.name} at ${adhan12}<br><span class="iqamah-label">${iqamahText}</span>`;
+    } else {
+      nextPanel.textContent = `${nextPrayer.name} at ${adhan12}`;
+    }
+  }
+}
 
     // Load once on page load
     loadPrayerTimes();
