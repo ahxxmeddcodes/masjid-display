@@ -147,6 +147,11 @@
       border-color: #582f0c;
     }
 
+    .prayer-row.current-glow {
+      border: 1px solid #582f0c;
+      box-shadow: 0 0 22px #582f0c;
+    }
+
     .next-prayer-panel {
       margin-top: 16px;
       padding: 12px 14px;
@@ -491,9 +496,423 @@
     setInterval(updateClock, 1000);
     updateClock();
 
+    function updateHijriDate() {
+      const hijriEl = document.getElementById("hijriDate");
+      if (!hijriEl) return;
+      try {
+        const now = new Date();
+        // Adjust Hijri date by -1 day because display is showing one day ahead
+        now.setDate(now.getDate() - 1);
+        const formatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        });
+        hijriEl.textContent = formatter.format(now);
+      } catch (e) {
+        hijriEl.textContent = "";
+      }
+    }
+
+    updateHijriDate();
+    // Update Hijri date once an hour (it only changes daily, so this is enough)
+    setInterval(updateHijriDate, 60 * 60 * 1000);
+
     /****************************************
-     * PRAYER TIMES
+     * YEAR‑ROUND PRAYER SCHEDULE (Editable)
      ****************************************/
+
+    const PRAYER_SCHEDULE = [
+      /* JANUARY (31 days) */
+      { month:1, from:"01-01", to:"01-07",
+  fajr:"06:29", iq_fajr:"06:41",
+  dhuhr:"12:43", iq_dhuhr:"12:58",
+  asr:"15:25", iq_asr:"15:40",
+  maghrib:"17:43", iq_maghrib:"17:45",
+  isha:"18:57", iq_isha:"19:12"
+},
+     { month:1, from:"01-08", to:"01-14",
+  fajr:"06:29", iq_fajr:"06:41",
+  dhuhr:"12:46", iq_dhuhr:"13:01",
+  asr:"15:31", iq_asr:"15:46",
+  maghrib:"17:50", iq_maghrib:"17:52",
+  isha:"19:03", iq_isha:"19:18"
+},
+      { month:1, from:"01-15", to:"01-21",
+  fajr:"06:29", iq_fajr:"06:39",
+  dhuhr:"12:48", iq_dhuhr:"13:03",
+  asr:"15:37", iq_asr:"15:52",
+  maghrib:"17:57", iq_maghrib:"17:59",
+  isha:"19:09", iq_isha:"19:24"
+},
+      { month:1, from:"01-22", to:"01-31",
+  fajr:"06:28", iq_fajr:"06:39",
+  dhuhr:"12:50", iq_dhuhr:"13:05",
+  asr:"15:46", iq_asr:"16:01",
+  maghrib:"18:07", iq_maghrib:"18:09",
+  isha:"19:18", iq_isha:"19:33"
+},
+
+      /* FEBRUARY (29 days for safety, works for 28 too) */
+      { month:2, from:"02-01", to:"02-07",
+  fajr:"06:23", iq_fajr:"06:33",
+  dhuhr:"12:51", iq_dhuhr:"13:06",
+  asr:"15:51", iq_asr:"16:06",
+  maghrib:"18:14", iq_maghrib:"18:16",
+  isha:"19:24", iq_isha:"19:39"
+},
+      { month:2, from:"02-08", to:"02-14",
+  fajr:"06:18", iq_fajr:"06:27",
+  dhuhr:"12:51", iq_dhuhr:"13:06",
+  asr:"15:56", iq_asr:"16:11",
+  maghrib:"18:20", iq_maghrib:"18:22",
+  isha:"19:30", iq_isha:"19:45"
+},
+      { month:2, from:"02-15", to:"02-21",
+  fajr:"06:12", iq_fajr:"06:21",
+  dhuhr:"12:51", iq_dhuhr:"13:06",
+  asr:"16:00", iq_asr:"16:15",
+  maghrib:"18:26", iq_maghrib:"18:28",
+  isha:"19:35", iq_isha:"19:50"
+},
+      { month:2, from:"02-22", to:"02-29",
+  fajr:"06:05", iq_fajr:"06:13",
+  dhuhr:"12:51", iq_dhuhr:"13:06",
+  asr:"16:05", iq_asr:"16:20",
+  maghrib:"18:33", iq_maghrib:"18:35",
+  isha:"19:42", iq_isha:"19:57"
+},
+
+      /* MARCH (31 days) */
+{ month:3, from:"03-01", to:"03-07",
+  fajr:"05:56", iq_fajr:"06:04",
+  dhuhr:"12:49", iq_dhuhr:"13:04",
+  asr:"16:08", iq_asr:"16:23",
+  maghrib:"18:38", iq_maghrib:"18:40",
+  isha:"19:47", iq_isha:"20:02"
+},
+
+{ month:3, from:"03-08", to:"03-14",
+  fajr:"06:47", iq_fajr:"06:55",
+  dhuhr:"13:48", iq_dhuhr:"14:03",
+  asr:"17:10", iq_asr:"17:25",
+  maghrib:"19:45", iq_maghrib:"19:47",
+  isha:"20:53", iq_isha:"21:08"
+},
+
+{ month:3, from:"03-15", to:"03-21",
+  fajr:"06:38", iq_fajr:"06:46",
+  dhuhr:"13:46", iq_dhuhr:"14:01",
+  asr:"17:12", iq_asr:"17:27",
+  maghrib:"19:50", iq_maghrib:"19:52",
+  isha:"20:59", iq_isha:"21:14"
+},
+
+{ month:3, from:"03-22", to:"03-31",
+  fajr:"06:28", iq_fajr:"06:37",
+  dhuhr:"13:44", iq_dhuhr:"13:59",
+  asr:"17:14", iq_asr:"17:29",
+  maghrib:"19:57", iq_maghrib:"19:59",
+  isha:"21:07", iq_isha:"21:22"
+},
+
+      /* APRIL (30 days) */
+{ month:4, from:"04-01", to:"04-07",
+  fajr:"06:14", iq_fajr:"06:23",
+  dhuhr:"13:41", iq_dhuhr:"13:56",
+  asr:"17:15", iq_asr:"17:30",
+  maghrib:"20:03", iq_maghrib:"20:05",
+  isha:"21:13", iq_isha:"21:28"
+},
+
+{ month:4, from:"04-08", to:"04-14",
+  fajr:"06:03", iq_fajr:"06:14",
+  dhuhr:"13:39", iq_dhuhr:"13:54",
+  asr:"17:16", iq_asr:"17:31",
+  maghrib:"20:08", iq_maghrib:"20:10",
+  isha:"21:20", iq_isha:"21:35"
+},
+
+{ month:4, from:"04-15", to:"04-21",
+  fajr:"05:53", iq_fajr:"06:05",
+  dhuhr:"13:37", iq_dhuhr:"13:52",
+  asr:"17:16", iq_asr:"17:31",
+  maghrib:"20:13", iq_maghrib:"20:15",
+  isha:"21:26", iq_isha:"21:41"
+},
+
+{ month:4, from:"04-22", to:"04-30",
+  fajr:"05:44", iq_fajr:"05:57",
+  dhuhr:"13:35", iq_dhuhr:"13:50",
+  asr:"17:16", iq_asr:"17:31",
+  maghrib:"20:20", iq_maghrib:"20:22",
+  isha:"21:35", iq_isha:"21:50"
+},
+
+      /* MAY (31 days) */
+{ month:5, from:"05-01", to:"05-07",
+  fajr:"05:32", iq_fajr:"05:47",
+  dhuhr:"13:34", iq_dhuhr:"13:49",
+  asr:"17:17", iq_asr:"17:32",
+  maghrib:"20:25", iq_maghrib:"20:27",
+  isha:"21:42", iq_isha:"21:57"
+},
+
+{ month:5, from:"05-08", to:"05-14",
+  fajr:"05:24", iq_fajr:"05:41",
+  dhuhr:"13:34", iq_dhuhr:"13:49",
+  asr:"17:17", iq_asr:"17:32",
+  maghrib:"20:31", iq_maghrib:"20:33",
+  isha:"21:49", iq_isha:"22:04"
+},
+
+{ month:5, from:"05-15", to:"05-21",
+  fajr:"05:17", iq_fajr:"05:35",
+  dhuhr:"13:34", iq_dhuhr:"13:49",
+  asr:"17:18", iq_asr:"17:33",
+  maghrib:"20:36", iq_maghrib:"20:38",
+  isha:"21:56", iq_isha:"22:11"
+},
+
+{ month:5, from:"05-22", to:"05-31",
+  fajr:"05:11", iq_fajr:"05:31",
+  dhuhr:"13:35", iq_dhuhr:"13:50",
+  asr:"17:19", iq_asr:"17:34",
+  maghrib:"20:42", iq_maghrib:"20:44",
+  isha:"22:04", iq_isha:"22:19"
+},
+
+      /* JUNE (30 days) */
+{ month:6, from:"06-01", to:"06-07",
+  fajr:"05:05", iq_fajr:"05:27",
+  dhuhr:"13:36", iq_dhuhr:"13:51",
+  asr:"17:20", iq_asr:"17:35",
+  maghrib:"20:46", iq_maghrib:"20:48",
+  isha:"22:09", iq_isha:"22:24"
+},
+
+{ month:6, from:"06-08", to:"06-14",
+  fajr:"05:03", iq_fajr:"05:25",
+  dhuhr:"13:37", iq_dhuhr:"13:52",
+  asr:"17:22", iq_asr:"17:37",
+  maghrib:"20:49", iq_maghrib:"20:51",
+  isha:"22:12", iq_isha:"22:27"
+},
+
+{ month:6, from:"06-15", to:"06-21",
+  fajr:"05:03", iq_fajr:"05:26",
+  dhuhr:"13:39", iq_dhuhr:"13:54",
+  asr:"17:23", iq_asr:"17:38",
+  maghrib:"20:51", iq_maghrib:"20:53",
+  isha:"22:15", iq_isha:"22:30"
+},
+
+{ month:6, from:"06-22", to:"06-30",
+  fajr:"05:07", iq_fajr:"05:29",
+  dhuhr:"13:41", iq_dhuhr:"13:56",
+  asr:"17:25", iq_asr:"17:40",
+  maghrib:"20:52", iq_maghrib:"20:54",
+  isha:"22:15", iq_isha:"22:30"
+},
+
+      /* JULY (31 days) */
+{ month:7, from:"07-01", to:"07-07",
+  fajr:"05:11", iq_fajr:"05:32",
+  dhuhr:"13:42", iq_dhuhr:"13:57",
+  asr:"17:27", iq_asr:"17:42",
+  maghrib:"20:51", iq_maghrib:"20:53",
+  isha:"22:15", iq_isha:"22:30"
+},
+
+{ month:7, from:"07-08", to:"07-14",
+  fajr:"05:17", iq_fajr:"05:36",
+  dhuhr:"13:43", iq_dhuhr:"13:58",
+  asr:"17:27", iq_asr:"17:42",
+  maghrib:"20:50", iq_maghrib:"20:52",
+  isha:"22:12", iq_isha:"22:27"
+},
+
+{ month:7, from:"07-15", to:"07-21",
+  fajr:"05:23", iq_fajr:"05:41",
+  dhuhr:"13:44", iq_dhuhr:"13:59",
+  asr:"17:28", iq_asr:"17:43",
+  maghrib:"20:48", iq_maghrib:"20:50",
+  isha:"22:09", iq_isha:"22:24"
+},
+
+{ month:7, from:"07-22", to:"07-31",
+  fajr:"05:32", iq_fajr:"05:48",
+  dhuhr:"13:44", iq_dhuhr:"13:59",
+  asr:"17:28", iq_asr:"17:43",
+  maghrib:"20:44", iq_maghrib:"20:46",
+  isha:"22:04", iq_isha:"22:19"
+},
+
+      /* AUGUST (31 days) */
+{ month:8, from:"08-01", to:"08-07",
+  fajr:"05:39", iq_fajr:"05:53",
+  dhuhr:"13:43", iq_dhuhr:"13:58",
+  asr:"17:27", iq_asr:"17:42",
+  maghrib:"20:37", iq_maghrib:"20:39",
+  isha:"21:47", iq_isha:"22:02"
+},
+
+{ month:8, from:"08-08", to:"08-14",
+  fajr:"05:45", iq_fajr:"05:58",
+  dhuhr:"13:43", iq_dhuhr:"13:58",
+  asr:"17:25", iq_asr:"17:40",
+  maghrib:"20:30", iq_maghrib:"20:32",
+  isha:"21:46", iq_isha:"22:01"
+},
+
+{ month:8, from:"08-15", to:"08-21",
+  fajr:"05:52", iq_fajr:"06:03",
+  dhuhr:"13:41", iq_dhuhr:"13:56",
+  asr:"17:23", iq_asr:"17:38",
+  maghrib:"20:23", iq_maghrib:"20:25",
+  isha:"21:37", iq_isha:"21:52"
+},
+
+{ month:8, from:"08-22", to:"08-31",
+  fajr:"06:00", iq_fajr:"06:10",
+  dhuhr:"13:40", iq_dhuhr:"13:55",
+  asr:"17:19", iq_asr:"17:34",
+  maghrib:"20:15", iq_maghrib:"20:17",
+  isha:"21:27", iq_isha:"21:42"
+},
+
+      /* SEPTEMBER (30 days) */
+{ month:9, from:"09-01", to:"09-07",
+  fajr:"06:06", iq_fajr:"06:14",
+  dhuhr:"13:37", iq_dhuhr:"13:52",
+  asr:"17:13", iq_asr:"17:28",
+  maghrib:"20:02", iq_maghrib:"20:04",
+  isha:"21:12", iq_isha:"21:27"
+},
+
+{ month:9, from:"09-08", to:"09-14",
+  fajr:"06:12", iq_fajr:"06:19",
+  dhuhr:"13:35", iq_dhuhr:"13:50",
+  asr:"17:08", iq_asr:"17:23",
+  maghrib:"19:53", iq_maghrib:"19:55",
+  isha:"21:02", iq_isha:"21:17"
+},
+
+{ month:9, from:"09-15", to:"09-21",
+  fajr:"06:17", iq_fajr:"06:24",
+  dhuhr:"13:32", iq_dhuhr:"13:47",
+  asr:"17:03", iq_asr:"17:18",
+  maghrib:"19:43", iq_maghrib:"19:45",
+  isha:"20:52", iq_isha:"21:07"
+},
+
+{ month:9, from:"09-22", to:"09-30",
+  fajr:"06:23", iq_fajr:"06:30",
+  dhuhr:"13:30", iq_dhuhr:"13:45",
+  asr:"16:56", iq_asr:"17:11",
+  maghrib:"19:33", iq_maghrib:"19:35",
+  isha:"20:41", iq_isha:"20:56"
+},
+
+      /* OCTOBER (31 days) */
+{ month:10, from:"10-01", to:"10-07",
+  fajr:"06:29", iq_fajr:"06:35",
+  dhuhr:"13:27", iq_dhuhr:"13:42",
+  asr:"16:48", iq_asr:"17:03",
+  maghrib:"19:21", iq_maghrib:"19:23",
+  isha:"20:29", iq_isha:"20:44"
+},
+
+{ month:10, from:"10-08", to:"10-14",
+  fajr:"06:34", iq_fajr:"06:40",
+  dhuhr:"13:24", iq_dhuhr:"13:39",
+  asr:"16:42", iq_asr:"16:57",
+  maghrib:"19:12", iq_maghrib:"19:14",
+  isha:"20:20", iq_isha:"20:35"
+},
+
+{ month:10, from:"10-15", to:"10-21",
+  fajr:"06:39", iq_fajr:"06:46",
+  dhuhr:"13:23", iq_dhuhr:"13:38",
+  asr:"16:35", iq_asr:"16:50",
+  maghrib:"19:03", iq_maghrib:"19:05",
+  isha:"20:11", iq_isha:"20:26"
+},
+
+{ month:10, from:"10-22", to:"10-31",
+  fajr:"06:46", iq_fajr:"06:54",
+  dhuhr:"13:21", iq_dhuhr:"13:36",
+  asr:"16:29", iq_asr:"16:44",
+  maghrib:"18:55", iq_maghrib:"18:57",
+  isha:"20:03", iq_isha:"20:18"
+},
+
+      /* NOVEMBER (30 days) */
+{ month:11, from:"11-01", to:"11-07",
+  fajr:"06:52", iq_fajr:"07:01",
+  dhuhr:"13:21", iq_dhuhr:"13:36",
+  asr:"16:21", iq_asr:"16:36",
+  maghrib:"18:44", iq_maghrib:"18:46",
+  isha:"19:54", iq_isha:"20:09"
+},
+
+{ month:11, from:"11-08", to:"11-14",
+  fajr:"05:58", iq_fajr:"06:07",
+  dhuhr:"12:32", iq_dhuhr:"12:37",
+  asr:"15:17", iq_asr:"15:32",
+  maghrib:"17:38", iq_maghrib:"17:40",
+  isha:"18:49", iq_isha:"19:04"
+},
+
+{ month:11, from:"11-15", to:"11-21",
+  fajr:"06:03", iq_fajr:"06:14",
+  dhuhr:"12:23", iq_dhuhr:"12:38",
+  asr:"15:13", iq_asr:"15:28",
+  maghrib:"17:34", iq_maghrib:"17:36",
+  isha:"18:45", iq_isha:"19:00"
+},
+
+{ month:11, from:"11-22", to:"11-30",
+  fajr:"06:10", iq_fajr:"06:22",
+  dhuhr:"12:26", iq_dhuhr:"12:41",
+  asr:"15:11", iq_asr:"15:26",
+  maghrib:"17:31", iq_maghrib:"17:33",
+  isha:"18:42", iq_isha:"18:57"
+},
+
+      /* DECEMBER (31 days) */
+{ month:12, from:"12-01", to:"12-07",
+  fajr:"06:16", iq_fajr:"06:28",
+  dhuhr:"12:29", iq_dhuhr:"12:44",
+  asr:"15:10", iq_asr:"15:25",
+  maghrib:"17:29", iq_maghrib:"17:31",
+  isha:"18:42", iq_isha:"18:57"
+},
+
+{ month:12, from:"12-08", to:"12-14",
+  fajr:"06:20", iq_fajr:"06:33",
+  dhuhr:"12:32", iq_dhuhr:"12:47",
+  asr:"15:12", iq_asr:"15:27",
+  maghrib:"17:30", iq_maghrib:"17:32",
+  isha:"18:44", iq_isha:"18:59"
+},
+
+{ month:12, from:"12-15", to:"12-21",
+  fajr:"06:24", iq_fajr:"06:37",
+  dhuhr:"12:35", iq_dhuhr:"12:50",
+  asr:"15:15", iq_asr:"15:30",
+  maghrib:"17:33", iq_maghrib:"17:35",
+  isha:"18:47", iq_isha:"19:02"
+},
+
+{ month:12, from:"12-22", to:"12-31",
+  fajr:"06:27", iq_fajr:"06:40",
+  dhuhr:"12:40", iq_dhuhr:"12:55",
+  asr:"15:20", iq_asr:"15:35",
+  maghrib:"17:39", iq_maghrib:"17:41",
+  isha:"18:52", iq_isha:"19:07"
+}
+    ];
 
     // Convert "HH:MM" (24‑hour) → "h:MM AM/PM"
     function to12Hour(timeStr) {
@@ -503,15 +922,6 @@
       return `${h12}:${minute.toString().padStart(2,"0")} ${suffix}`;
     }
 
-    // Add minutes to a "HH:MM" time string (24-hour) and return new "HH:MM"
-    function addMinutesToTime(timeStr, minutesToAdd) {
-      const [hour, minute] = timeStr.split(":").map(Number);
-      const baseDate = new Date(2000, 0, 1, hour, minute);
-      baseDate.setMinutes(baseDate.getMinutes() + minutesToAdd);
-      const newHour = baseDate.getHours();
-      const newMinute = baseDate.getMinutes();
-      return `${String(newHour).padStart(2, "0")}:${String(newMinute).padStart(2, "0")}`;
-    }
 
     let prayerSchedule = []; // Will store today's prayers as Date objects
 
@@ -519,183 +929,122 @@
       const methodText = document.getElementById("methodText");
       const listEl = document.getElementById("prayerList");
 
-      try {
-        methodText.textContent = "Loading prayer times…";
-        listEl.innerHTML = "";
+      methodText.textContent = "";
+      listEl.innerHTML = "";
 
-        const url =
-          "https://api.aladhan.com/v1/timingsByCity?city=" +
-          encodeURIComponent(CITY) +
-          "&country=" +
-          encodeURIComponent(COUNTRY) +
-          "&method=" +
-          CALC_METHOD;
+      const now = new Date();
+      const mm = now.getMonth() + 1;
+      const dd = now.getDate();
 
-        const res = await fetch(url);
-        const json = await res.json();
+      const key = `${String(mm).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+      const todayEntry = PRAYER_SCHEDULE.find(e => key >= e.from && key <= e.to);
 
-        if (json.code !== 200) {
-          methodText.textContent = "Error loading prayer times.";
-          return;
-        }
-
-        const data = json.data;
-        const timings = data.timings;
-
-        // Hide location and calculation method in the UI
-        methodText.textContent = "";
-
-        // Set Hijri date under the main date/time
-        const hijri = data.date && data.date.hijri;
-        const hijriEl = document.getElementById("hijriDate");
-        if (hijri && hijriEl) {
-          hijriEl.textContent = `${hijri.day} ${hijri.month.en} ${hijri.year} AH`;
-        }
-
-        // Define which prayers to show and in what order
-        const prayersToShow = [
-          "Fajr",
-          "Sunrise",
-          "Dhuhr",
-          "Asr",
-          "Maghrib",
-          "Isha"
-        ];
-
-        const now = new Date();
-        prayerSchedule = [];
-
-        prayersToShow.forEach((name) => {
-          const timeStr = timings[name]; // e.g. "05:34"
-          if (!timeStr) return;
-
-          const [hour, minute] = timeStr.split(":").map(Number);
-          const dt = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            hour,
-            minute
-          );
-
-          prayerSchedule.push({
-            name,
-            timeStr,
-            date: dt
-          });
-        });
-
-        // Render rows
-        listEl.innerHTML = "";
-        prayerSchedule.forEach((p) => {
-          const row = document.createElement("div");
-          row.className = "prayer-row";
-
-          const label = document.createElement("div");
-          label.className = "prayer-row-label";
-          label.textContent = p.name;
-
-          const time = document.createElement("div");
-          time.className = "prayer-row-time";
-
-          // Base adhan time (converted to 12-hour)
-          const adhan12 = to12Hour(p.timeStr);
-
-          // Compute iqamah time: +15 mins for all except Maghrib, which is +2 mins.
-          let iqamahText = "";
-          if (["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(p.name)) {
-            const offset = p.name === "Maghrib" ? 2 : 15;
-            const iqamah24 = addMinutesToTime(p.timeStr, offset);
-            const iqamah12 = to12Hour(iqamah24);
-            iqamahText = `Iqamah ${iqamah12}`;
-          }
-
-          if (iqamahText) {
-            time.innerHTML = `${adhan12}<br><span class="iqamah-label">${iqamahText}</span>`;
-          } else {
-            time.textContent = adhan12;
-          }
-
-          row.appendChild(label);
-          row.appendChild(time);
-          listEl.appendChild(row);
-        });
-
-        // Highlight next prayer once now; then keep updating
-        updateNextPrayerHighlight();
-      } catch (err) {
-        console.error(err);
-        methodText.textContent = "Failed to load prayer times.";
+      if (!todayEntry) {
+        listEl.innerHTML = "<div style='color:red;'>No schedule entry found.</div>";
+        return;
       }
+
+      const prayersToShow = ["Fajr","Dhuhr","Asr","Maghrib","Isha"];
+      prayerSchedule = [];
+
+      prayersToShow.forEach(name => {
+        const timeStr = todayEntry[name.toLowerCase()];
+        if (!timeStr) return;
+
+        const [hour, minute] = timeStr.split(":").map(Number);
+        const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+
+        let iqKey = "iq_" + name.toLowerCase();
+        let iqamah = todayEntry[iqKey] || "";
+        prayerSchedule.push({ name, timeStr, iqamahStr: iqamah, date: dt });
+      });
+
+      listEl.innerHTML = "";
+      prayerSchedule.forEach((p) => {
+        const row = document.createElement("div");
+        row.className = "prayer-row";
+
+        const label = document.createElement("div");
+        label.className = "prayer-row-label";
+        label.textContent = p.name;
+
+        const time = document.createElement("div");
+        time.className = "prayer-row-time";
+
+        const adhan12 = to12Hour(p.timeStr);
+        const iqamah12 = p.iqamahStr ? to12Hour(p.iqamahStr) : "";
+        if (iqamah12) {
+          time.innerHTML = `${adhan12}<br><span class="iqamah-label">Iqamah ${iqamah12}</span>`;
+        } else {
+          time.textContent = adhan12;
+        }
+
+        row.appendChild(label);
+        row.appendChild(time);
+        listEl.appendChild(row);
+      });
+
+      updateNextPrayerHighlight();
     }
 
     function updateNextPrayerHighlight() {
-  if (!prayerSchedule || prayerSchedule.length === 0) return;
+      if (!prayerSchedule || prayerSchedule.length === 0) return;
 
-  const now = new Date();
-  const THIRTY_MIN = 30 * 60 * 1000;
-  let nextPrayer = null;
+      const now = new Date();
+      const ONE_HOUR = 30 * 60 * 1000;
+      let nextPrayer = null;
 
-  // Determine the next upcoming prayer
-  for (const p of prayerSchedule) {
-    if (p.date > now) {
-      nextPrayer = p;
-      break;
+      // Determine the next upcoming prayer
+      for (const p of prayerSchedule) {
+        if (p.date > now) {
+          nextPrayer = p;
+          break;
+        }
+      }
+
+      // If all prayers are past, consider the first prayer as the "next" (for the next day)
+      if (!nextPrayer) {
+        nextPrayer = prayerSchedule[0];
+      }
+
+      const rows = document.querySelectorAll(".prayer-row");
+
+      // Remove old highlights
+      rows.forEach((row) => {
+        row.classList.remove("next");
+        row.classList.remove("current-glow");
+      });
+
+      // Add "next" border highlight to the upcoming prayer
+      rows.forEach((row) => {
+        const label = row.querySelector(".prayer-row-label");
+        if (label && label.textContent === nextPrayer.name) {
+          row.classList.add("next");
+        }
+      });
+
+      // Add glow to the CURRENT prayer row if within ±1 hour of its time
+      rows.forEach((row, index) => {
+        const p = prayerSchedule[index];
+        if (!p) return;
+        const diff = now - p.date; // positive if now is after the prayer time
+        if (Math.abs(diff) <= ONE_HOUR) {
+          row.classList.add("current-glow");
+        }
+      });
+
+      // Update the next prayer panel at the bottom
+      const nextPanel = document.getElementById("nextPrayerPanel");
+      if (nextPanel) {
+        const adhan12 = to12Hour(nextPrayer.timeStr);
+        const iqamah12 = nextPrayer.iqamahStr ? to12Hour(nextPrayer.iqamahStr) : "";
+        if (iqamah12) {
+          nextPanel.innerHTML = `${nextPrayer.name} at ${adhan12}<br><span class="iqamah-label">Iqamah ${iqamah12}</span>`;
+        } else {
+          nextPanel.textContent = `${nextPrayer.name} at ${adhan12}`;
+        }
+      }
     }
-  }
-
-  // If all prayers are past, consider the first prayer as the "next" (for the next day)
-  if (!nextPrayer) {
-    nextPrayer = prayerSchedule[0];
-  }
-
-  const rows = document.querySelectorAll(".prayer-row");
-
-  // Remove old highlights
-  rows.forEach((row) => {
-    row.classList.remove("next");
-    row.classList.remove("current-glow");
-  });
-
-  // Add "next" border highlight to the upcoming prayer
-  rows.forEach((row) => {
-    const label = row.querySelector(".prayer-row-label");
-    if (label && label.textContent === nextPrayer.name) {
-      row.classList.add("next");
-    }
-  });
-
-  // Add glow to the CURRENT prayer (±30 min window)
-  rows.forEach((row, index) => {
-    const p = prayerSchedule[index];
-    if (!p) return;
-    const diff = now - p.date; // positive if now is after prayer time
-    if (Math.abs(diff) <= THIRTY_MIN) {
-      row.classList.add("current-glow");
-    }
-  });
-
-  // Update the next prayer panel at the bottom
-  const nextPanel = document.getElementById("nextPrayerPanel");
-  if (nextPanel) {
-    const adhan12 = to12Hour(nextPrayer.timeStr);
-
-    // Compute iqamah time: +15 mins for all except Maghrib, which is +2 mins.
-    let iqamahText = "";
-    if (["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(nextPrayer.name)) {
-      const offset = nextPrayer.name === "Maghrib" ? 2 : 15;
-      const iqamah24 = addMinutesToTime(nextPrayer.timeStr, offset);
-      const iqamah12 = to12Hour(iqamah24);
-      iqamahText = `Iqamah ${iqamah12}`;
-    }
-
-    if (iqamahText) {
-      nextPanel.innerHTML = `${nextPrayer.name} at ${adhan12}<br><span class="iqamah-label">${iqamahText}</span>`;
-    } else {
-      nextPanel.textContent = `${nextPrayer.name} at ${adhan12}`;
-    }
-  }
-}
 
     // Load once on page load
     loadPrayerTimes();
