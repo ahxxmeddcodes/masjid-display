@@ -948,15 +948,24 @@
       prayerSchedule = [];
 
       prayersToShow.forEach(name => {
-        const timeStr = todayEntry[name.toLowerCase()];
-        if (!timeStr) return;
+        const adhanStr = todayEntry[name.toLowerCase()] || "";
+        const iqKey = "iq_" + name.toLowerCase();
+        const iqamahStr = todayEntry[iqKey] || "";
 
-        const [hour, minute] = timeStr.split(":").map(Number);
-        const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+        // Use iqamah time as the base (actual prayer time). If missing, fall back to adhan.
+        const baseStr = iqamahStr || adhanStr;
+        if (!baseStr) return;
 
-        let iqKey = "iq_" + name.toLowerCase();
-        let iqamah = todayEntry[iqKey] || "";
-        prayerSchedule.push({ name, timeStr, iqamahStr: iqamah, date: dt });
+        const [hour, minute] = baseStr.split(":").map(Number);
+        const dt = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          hour,
+          minute
+        );
+
+        prayerSchedule.push({ name, adhanStr, iqamahStr, date: dt });
       });
 
       listEl.innerHTML = "";
@@ -971,12 +980,17 @@
         const time = document.createElement("div");
         time.className = "prayer-row-time";
 
-        const adhan12 = to12Hour(p.timeStr);
-        const iqamah12 = p.iqamahStr ? to12Hour(p.iqamahStr) : "";
-        if (iqamah12) {
-          time.innerHTML = `${adhan12}<br><span class="iqamah-label">Iqamah ${iqamah12}</span>`;
+        // Main displayed time = iqamah (actual prayer), fall back to adhan if needed
+        const mainStr = p.iqamahStr || p.adhanStr;
+        const main12 = to12Hour(mainStr);
+
+        // Secondary line = Adhan time, if available
+        const adhan12 = p.adhanStr ? to12Hour(p.adhanStr) : "";
+
+        if (adhan12) {
+          time.innerHTML = `${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
         } else {
-          time.textContent = adhan12;
+          time.textContent = main12;
         }
 
         row.appendChild(label);
@@ -1033,15 +1047,17 @@
         }
       });
 
-      // Update the next prayer panel at the bottom
+      // Update the next prayer panel at the bottom (main = iqamah, secondary = Adhan)
       const nextPanel = document.getElementById("nextPrayerPanel");
       if (nextPanel) {
-        const adhan12 = to12Hour(nextPrayer.timeStr);
-        const iqamah12 = nextPrayer.iqamahStr ? to12Hour(nextPrayer.iqamahStr) : "";
-        if (iqamah12) {
-          nextPanel.innerHTML = `${nextPrayer.name} at ${adhan12}<br><span class="iqamah-label">Iqamah ${iqamah12}</span>`;
+        const mainStr = nextPrayer.iqamahStr || nextPrayer.adhanStr;
+        const main12 = to12Hour(mainStr);
+        const adhan12 = nextPrayer.adhanStr ? to12Hour(nextPrayer.adhanStr) : "";
+
+        if (adhan12) {
+          nextPanel.innerHTML = `${nextPrayer.name} at ${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
         } else {
-          nextPanel.textContent = `${nextPrayer.name} at ${adhan12}`;
+          nextPanel.textContent = `${nextPrayer.name} at ${main12}`;
         }
       }
     }
