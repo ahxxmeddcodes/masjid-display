@@ -16,14 +16,25 @@
       background: #f2f1e6;
       color: #582f0c;
       height: 100vh;
+      margin: 0;
       overflow: hidden;
+
+      /* Center the main display and create a safe area for TVs / kiosk browsers */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .screen {
       display: flex;
       flex-direction: row;
-      height: 100vh;
-      width: 100vw;
+
+      /* Use a slightly smaller area than the full viewport to avoid edges being cut off
+         on TVs and in Fully Kiosk, while still filling most of the screen on desktops. */
+      width: 96vw;
+      height: 96vh;
+      max-width: 1920px;
+      max-height: 1080px;
     }
 
     /* LEFT SIDE: MASJID + PRAYER TIMES */
