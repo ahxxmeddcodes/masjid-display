@@ -76,16 +76,16 @@
       margin-top: 4px;
     }
 
-    .date-time {
-      margin-top: 16px;
-      font-size: 1.35rem;
+    .current-date {
+      margin-top: 12px;
+      font-size: 1.2rem;
       color: #000000;
     }
 
-    .hijri-date {
-      margin-top: 4px;
-      font-size: 1.1rem;
-      font-style: italic;
+    .current-time {
+      margin-top: 6px;
+      font-size: 2.4rem;
+      font-weight: 700;
       color: #000000;
     }
 
@@ -246,7 +246,7 @@
     }
 
     .quran-ayah {
-      font-size: 1rem;
+      font-size: 1.4rem;
       font-weight: 500;
       margin-bottom: 2px;
     }
@@ -283,11 +283,9 @@
     }
 
     .slide-dots {
-      position: absolute;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-top: 8px;
       display: flex;
+      justify-content: center;
       gap: 6px;
     }
 
@@ -323,8 +321,8 @@
         <div class="header-block">
           <div class="masjid-name" id="masjidName">Masjid An Nur</div>
           <div class="date-card">
-            <div class="date-time" id="dateTime"></div>
-            <div class="hijri-date" id="hijriDate"></div>
+            <div class="current-date" id="currentDate"></div>
+            <div class="current-time" id="currentTime"></div>
           </div>
         </div>
 
@@ -521,34 +519,15 @@
       const dateStr = now.toLocaleDateString(undefined, dateOptions);
       const timeStr = now.toLocaleTimeString(undefined, timeOptions);
 
-      const dateTimeEl = document.getElementById("dateTime");
-      dateTimeEl.textContent = `${dateStr} • ${timeStr}`;
+      const dateEl = document.getElementById("currentDate");
+      const timeEl = document.getElementById("currentTime");
+
+      if (dateEl) dateEl.textContent = dateStr;
+      if (timeEl) timeEl.textContent = timeStr;
     }
 
     setInterval(updateClock, 1000);
     updateClock();
-
-    function updateHijriDate() {
-      const hijriEl = document.getElementById("hijriDate");
-      if (!hijriEl) return;
-      try {
-        const now = new Date();
-        // Adjust Hijri date by -1 day because display is showing one day ahead
-        now.setDate(now.getDate() - 1);
-        const formatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
-          day: "numeric",
-          month: "long",
-          year: "numeric"
-        });
-        hijriEl.textContent = formatter.format(now);
-      } catch (e) {
-        hijriEl.textContent = "";
-      }
-    }
-
-    updateHijriDate();
-    // Update Hijri date once an hour (it only changes daily, so this is enough)
-    setInterval(updateHijriDate, 60 * 60 * 1000);
 
     /****************************************
      * YEAR‑ROUND PRAYER SCHEDULE (Editable)
