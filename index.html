@@ -53,6 +53,15 @@
       margin-bottom: 20px;
     }
 
+    .date-card {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      box-shadow: 0 10px 26px rgba(88,47,12,0.2);
+    }
+
     .masjid-name {
       font-size: 2.2rem;
       font-weight: 700;
@@ -182,7 +191,16 @@
     }
 
     .next-prayer-text {
+      margin-top: 6px;
       font-size: 1.2rem;
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .next-prayer-countdown {
+      margin-top: 8px;
+      margin-bottom: 4px;
+      font-size: 2.5rem;
       font-weight: 700;
       color: #000000;
     }
@@ -195,6 +213,7 @@
     }
 
     .footer {
+      margin-top: 18px;
       font-size: 1rem;
       color: #000000;
     }
@@ -303,9 +322,10 @@
       <div>
         <div class="header-block">
           <div class="masjid-name" id="masjidName">Masjid An Nur</div>
-          <div class="masjid-tagline">Prayer Times</div>
-          <div class="date-time" id="dateTime"></div>
-          <div class="hijri-date" id="hijriDate"></div>
+          <div class="date-card">
+            <div class="date-time" id="dateTime"></div>
+            <div class="hijri-date" id="hijriDate"></div>
+          </div>
         </div>
 
         <div class="prayer-card">
@@ -319,15 +339,16 @@
         </div>
 
         <div class="next-prayer-panel">
-          <div class="next-prayer-label">Next Prayer</div>
+          <div class="next-prayer-label">Countdown to Next Prayer</div>
+          <div class="next-prayer-countdown" id="nextPrayerCountdown">--:--:--</div>
           <div class="next-prayer-text" id="nextPrayerPanel">Loading...</div>
         </div>
-      </div>
 
-      <div class="footer">
-        Display managed by Masjid An Nur
-      </div>
-    </div>
+        <div class="footer">
+          Display managed by Masjid An Nur
+        </div>
+      </div> <!-- end inner wrapper in left -->
+    </div> <!-- end .left -->
 
     <!-- RIGHT PANEL -->
     <div class="right">
@@ -1013,24 +1034,32 @@
     }
 
     function updateNextPrayerHighlight() {
-      if (!prayerSchedule || prayerSchedule.length === 0) return;
+  if (!prayerSchedule || prayerSchedule.length === 0) return;
 
-      const now = new Date();
-      const ONE_HOUR = 30 * 60 * 1000;
-      let nextPrayer = null;
+  const now = new Date();
+  const ONE_HOUR = 30 * 60 * 1000; // currently used as a 30-minute window
+  let nextPrayer = null;
+  let wrapToTomorrow = false;
 
-      // Determine the next upcoming prayer
-      for (const p of prayerSchedule) {
-        if (p.date > now) {
-          nextPrayer = p;
-          break;
-        }
-      }
+  // Determine the next upcoming prayer (today)
+  for (const p of prayerSchedule) {
+    if (p.date > now) {
+      nextPrayer = p;
+      break;
+    }
+  }
 
-      // If all prayers are past, consider the first prayer as the "next" (for the next day)
-      if (!nextPrayer) {
-        nextPrayer = prayerSchedule[0];
-      }
+  // If all prayers are past, treat the first prayer as tomorrow's Fajr
+  if (!nextPrayer) {
+    nextPrayer = prayerSchedule[0];
+    wrapToTomorrow = true;
+  }
+
+  // Separate date object for countdown so we can move it to tomorrow if needed
+  const nextPrayerDate = new Date(nextPrayer.date);
+  if (wrapToTomorrow) {
+    nextPrayerDate.setDate(nextPrayerDate.getDate() + 1);
+  }
 
       const rows = document.querySelectorAll(".prayer-row");
 
@@ -1058,27 +1087,42 @@
         }
       });
 
-      // Update the next prayer panel at the bottom (main = iqamah, secondary = Adhan)
-      const nextPanel = document.getElementById("nextPrayerPanel");
-      if (nextPanel) {
-        const mainStr = nextPrayer.iqamahStr || nextPrayer.adhanStr;
-        const main12 = to12Hour(mainStr);
-        const adhan12 = nextPrayer.adhanStr ? to12Hour(nextPrayer.adhanStr) : "";
+        // Update the next prayer panel at the bottom (main = iqamah, secondary = Adhan)
+  const nextPanel = document.getElementById("nextPrayerPanel");
+  if (nextPanel) {
+    const mainStr = nextPrayer.iqamahStr || nextPrayer.adhanStr;
+    const main12 = to12Hour(mainStr);
+    const adhan12 = nextPrayer.adhanStr ? to12Hour(nextPrayer.adhanStr) : "";
 
-        if (adhan12) {
-          nextPanel.innerHTML = `${nextPrayer.name} at ${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
-        } else {
-          nextPanel.textContent = `${nextPrayer.name} at ${main12}`;
-        }
-      }
+    if (adhan12) {
+      nextPanel.innerHTML = `${nextPrayer.name} at ${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
+    } else {
+      nextPanel.textContent = `${nextPrayer.name} at ${main12}`;
     }
+  }
+
+  // Update the countdown to next prayer (HH:MM:SS)
+  const countdownEl = document.getElementById("nextPrayerCountdown");
+  if (countdownEl) {
+    let diffMs = nextPrayerDate - now;
+    if (diffMs < 0) diffMs = 0;
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (n) => String(n).padStart(2, "0");
+    countdownEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+}
 
     // Load once on page load
     loadPrayerTimes();
     // Refresh times every 6 hours (more than enough)
     setInterval(loadPrayerTimes, 6 * 60 * 60 * 1000);
-    // Update highlight every 30 seconds
-    setInterval(updateNextPrayerHighlight, 30 * 1000);
+    // Update highlight and countdown every second
+setInterval(updateNextPrayerHighlight, 1000);
 
     /****************************************
      * SLIDESHOW
