@@ -160,6 +160,15 @@
       font-variant-numeric: tabular-nums;
       font-weight: 700;
       font-size: 1.35rem;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1.15;
+    }
+
+    .prayer-row-time .iqamah-label {
+      text-align: right;
     }
 
     .prayer-row.next {
@@ -343,7 +352,7 @@
         </div>
 
         <div class="footer">
-          Display managed by Masjid An Nur
+          This display is managed by Masjid An Nur, please see brother Ahmed for suggestions and feedback.
         </div>
       </div> <!-- end inner wrapper in left -->
     </div> <!-- end .left -->
@@ -934,6 +943,40 @@
       return `${h12}:${minute.toString().padStart(2,"0")} ${suffix}`;
     }
 
+    function isFriday(dateObj) {
+      // 5 = Friday (0=Sun,1=Mon,...)
+      return dateObj.getDay() === 5;
+    }
+
+    function applyFridayJumuahOverride(now, prayerObj) {
+      // If it's Friday and this is Dhuhr, override to Jumu'ah with fixed times.
+      if (!isFriday(now)) return prayerObj;
+      if (prayerObj.name !== "Dhuhr") return prayerObj;
+
+      // Jumu'ah prayer time (iqamah/base) 2:30 PM
+      const iqamahStr = "14:30";
+      // Khutbah start time shown as the "secondary" line 1:45 PM
+      const khutbahStr = "13:45";
+
+      // Build a new Date for 2:30 PM today (used for next-prayer detection + countdown)
+      const [h, m] = iqamahStr.split(":").map(Number);
+      const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+
+      return {
+        ...prayerObj,
+        // Internal canonical name stays Dhuhr, but displayName changes
+        displayName: "Jumu'ah",
+        // Secondary line becomes khutbah start instead of adhan
+        secondaryLabel: "Khutbah starts at",
+        secondaryTimeStr: khutbahStr,
+        // Base prayer time becomes 2:30 PM
+        iqamahStr,
+        // Keep adhanStr as the khutbah time so older code paths don't show "Adhan"
+        adhanStr: khutbahStr,
+        date: dt
+      };
+    }
+
 
     let prayerSchedule = []; // Will store today's prayers as Date objects
 
@@ -956,10 +999,10 @@
         return;
       }
 
-      const prayersToShow = ["Fajr","Dhuhr","Asr","Maghrib","Isha"];
+      const prayersToShow = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
       prayerSchedule = [];
 
-      prayersToShow.forEach(name => {
+      prayersToShow.forEach((name) => {
         const adhanStr = todayEntry[name.toLowerCase()] || "";
         const iqKey = "iq_" + name.toLowerCase();
         const iqamahStr = todayEntry[iqKey] || "";
@@ -969,15 +1012,22 @@
         if (!baseStr) return;
 
         const [hour, minute] = baseStr.split(":").map(Number);
-        const dt = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate(),
-          hour,
-          minute
-        );
+        const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
 
-        prayerSchedule.push({ name, adhanStr, iqamahStr, date: dt });
+        // Store both canonical name + display fields so Friday can override Dhuhr.
+        const basePrayer = {
+          name,
+          displayName: name,
+          adhanStr,
+          iqamahStr,
+          date: dt,
+          // Default secondary line is Adhan
+          secondaryLabel: "Adhan",
+          secondaryTimeStr: adhanStr
+        };
+
+        const finalPrayer = applyFridayJumuahOverride(now, basePrayer);
+        prayerSchedule.push(finalPrayer);
       });
 
       listEl.innerHTML = "";
@@ -987,7 +1037,7 @@
 
         const label = document.createElement("div");
         label.className = "prayer-row-label";
-        label.textContent = p.name;
+        label.textContent = p.displayName || p.name;
 
         const time = document.createElement("div");
         time.className = "prayer-row-time";
@@ -996,11 +1046,13 @@
         const mainStr = p.iqamahStr || p.adhanStr;
         const main12 = to12Hour(mainStr);
 
-        // Secondary line = Adhan time, if available
-        const adhan12 = p.adhanStr ? to12Hour(p.adhanStr) : "";
+        // Secondary line: Adhan for normal days, Khutbah start for Friday Jumu'ah
+        const secondaryLabel = p.secondaryLabel || "Adhan";
+        const secondaryTimeStr = p.secondaryTimeStr || p.adhanStr || "";
+        const secondary12 = secondaryTimeStr ? to12Hour(secondaryTimeStr) : "";
 
-        if (adhan12) {
-          time.innerHTML = `${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
+        if (secondary12) {
+          time.innerHTML = `${main12}<br><span class="iqamah-label">${secondaryLabel} ${secondary12}</span>`;
         } else {
           time.textContent = main12;
         }
@@ -1052,7 +1104,8 @@
       // Add "next" border highlight to the upcoming prayer
       rows.forEach((row) => {
         const label = row.querySelector(".prayer-row-label");
-        if (label && label.textContent === nextPrayer.name) {
+        const nextLabel = nextPrayer.displayName || nextPrayer.name;
+        if (label && label.textContent === nextLabel) {
           row.classList.add("next");
         }
       });
@@ -1067,17 +1120,22 @@
         }
       });
 
-        // Update the next prayer panel at the bottom (main = iqamah, secondary = Adhan)
+        // Update the next prayer panel at the bottom (main = iqamah, secondary = Adhan/Khutbah)
   const nextPanel = document.getElementById("nextPrayerPanel");
   if (nextPanel) {
+    const displayName = nextPrayer.displayName || nextPrayer.name;
+
     const mainStr = nextPrayer.iqamahStr || nextPrayer.adhanStr;
     const main12 = to12Hour(mainStr);
-    const adhan12 = nextPrayer.adhanStr ? to12Hour(nextPrayer.adhanStr) : "";
 
-    if (adhan12) {
-      nextPanel.innerHTML = `${nextPrayer.name} at ${main12}<br><span class="iqamah-label">Adhan ${adhan12}</span>`;
+    const secondaryLabel = nextPrayer.secondaryLabel || "Adhan";
+    const secondaryTimeStr = nextPrayer.secondaryTimeStr || nextPrayer.adhanStr || "";
+    const secondary12 = secondaryTimeStr ? to12Hour(secondaryTimeStr) : "";
+
+    if (secondary12) {
+      nextPanel.innerHTML = `${displayName} at ${main12}<br><span class="iqamah-label">${secondaryLabel} ${secondary12}</span>`;
     } else {
-      nextPanel.textContent = `${nextPrayer.name} at ${main12}`;
+      nextPanel.textContent = `${displayName} at ${main12}`;
     }
   }
 
