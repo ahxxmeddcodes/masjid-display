@@ -953,10 +953,11 @@
       if (!isFriday(now)) return prayerObj;
       if (prayerObj.name !== "Dhuhr") return prayerObj;
 
-      // Jumu'ah prayer time (iqamah/base) 2:30 PM
+      // Friday override:
+      // Main row time (iqamah/base) = Jumu'ah Khutbah at 1:45 PM
       const iqamahStr = "13:45";
-      // Khutbah start time shown as the "secondary" line 1:45 PM
-      const khutbahStr = "14:30";
+      // Secondary line = Salah at 2:20 PM
+      const khutbahStr = "14:20";
 
       // Build a new Date for 2:30 PM today (used for next-prayer detection + countdown)
       const [h, m] = iqamahStr.split(":").map(Number);
@@ -966,10 +967,10 @@
         ...prayerObj,
         // Internal canonical name stays Dhuhr, but displayName changes
         displayName: "Jumu'ah Khutbah",
-        // Secondary line becomes khutbah start instead of adhan
-        secondaryLabel: "Jumu'ah Salat is Around",
+        // Secondary line becomes Salah time (instead of Adhan)
+        secondaryLabel: "Salah",
         secondaryTimeStr: khutbahStr,
-        // Base prayer time becomes 2:30 PM
+        // Base prayer time becomes 1:45 PM (Jumu'ah Khutbah)
         iqamahStr,
         // Keep adhanStr as the khutbah time so older code paths don't show "Adhan"
         adhanStr: khutbahStr,
