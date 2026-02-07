@@ -40,7 +40,7 @@
     /* LEFT SIDE: MASJID + PRAYER TIMES */
 
     .left {
-      width: 35%;
+      width: 32%;
       padding: 36px 40px 40px 40px;
       display: flex;
       flex-direction: column;
@@ -438,7 +438,7 @@
     /* RIGHT SIDE: SLIDESHOW */
 
     .right {
-      width: 65%;
+      width: 68%;
       padding: 20px 24px;
       display: flex;
       flex-direction: column;
@@ -585,9 +585,7 @@
       <div class="slide-dots" id="slideDots"></div>
       <div class="bottom-prayer-area" id="bottomPrayerArea">
         <div class="prayer-card bottom">
-          <div class="prayer-card-title">
-            <span>Today's Prayer Times</span>
-          </div>
+          <div class="prayer-card-title"></div>
           <div class="method-text" id="methodText">Loading prayer times…</div>
           <div class="prayer-list" id="prayerList"></div>
         </div>
@@ -1191,9 +1189,9 @@
       return {
         ...prayerObj,
         // Internal canonical name stays Dhuhr, but displayName changes
-        displayName: "Jumu'ah Khutbah",
+        displayName: "Khutbah",
         // Secondary line becomes khutbah start instead of adhan
-        secondaryLabel: "Jumu'ah Salah",
+        secondaryLabel: "Salah",
         secondaryTimeStr: khutbahStr,
         // Base prayer time becomes 2:30 PM
         iqamahStr,
