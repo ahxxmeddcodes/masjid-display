@@ -98,13 +98,192 @@
     }
 
     .widget-box {
-      margin-top: 10px;
-      padding: 6px;
-      border-radius: 10px;
+      display: none;
+    }
+    /* Bottom area on the right: prayer times + countdown (replaces reviews) */
+    /* Bottom area on the right: prayer times + countdown (replaces reviews) */
+    .bottom-prayer-area {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      gap: 14px;
+      margin-top: 6px;
+      align-items: stretch;
+    }
+
+    .prayer-card.bottom {
+      margin-top: 0;
+      padding: 18px 16px;
+      border-radius: 18px;
       background: #f2f1e6;
-      box-shadow: 0 4px 12px rgba(88,47,12,0.12);
-      max-height: 250px;
+      box-shadow: 0 14px 40px rgba(88,47,12,0.25);
+      flex: 1 1 62%;
+    }
+
+    .next-prayer-panel.bottom {
+      margin-top: 0;
+      flex: 0 0 38%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Donation card (left panel replacement) */
+    .donation-card {
+      margin-top: 24px;
+      padding: 18px 16px;
+      border-radius: 18px;
+      background: #f2f1e6;
+      box-shadow: 0 14px 40px rgba(88,47,12,0.25);
+      border: 1px solid rgba(88, 47, 12, 0.15);
+    }
+
+    .donation-iframe-wrap {
+      width: 100%;
+      height: 520px;
+      border-radius: 14px;
       overflow: hidden;
+      border: 1px solid #582f0c;
+      box-shadow: 0 10px 26px rgba(88,47,12,0.18);
+      background: #f2f1e6;
+    }
+
+    .donation-iframe-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .donation-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 6px;
+    }
+
+    .donation-subtitle {
+      font-size: 1.05rem;
+      color: #000000;
+      margin-bottom: 14px;
+      line-height: 1.25;
+    }
+
+    .donation-highlight {
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      box-shadow: 0 10px 26px rgba(88,47,12,0.18);
+      margin-bottom: 14px;
+    }
+
+    .donation-highlight-label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 4px;
+    }
+
+    .donation-highlight-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .donation-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .donation-tier {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 12px;
+      border-radius: 12px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      color: #000000;
+      font-size: 1.1rem;
+    }
+
+    .donation-tier strong {
+      font-size: 1.2rem;
+    }
+
+    .donation-cta {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f2f1e6;
+      border: 1px solid #582f0c;
+      box-shadow: 0 10px 26px rgba(88,47,12,0.18);
+      margin-bottom: 12px;
+    }
+
+    .donation-qr {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      border: 2px dashed #582f0c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .donation-qr-inner {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-align: center;
+      color: #000000;
+      padding: 8px;
+    }
+
+    .donation-cta-text {
+      flex: 1;
+    }
+
+    .donation-cta-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 4px;
+    }
+
+    .donation-cta-body {
+      font-size: 1rem;
+      color: #000000;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .donation-link {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .donation-link-muted {
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .donation-note {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #000000;
+      text-align: center;
+      margin-top: 6px;
     }
 
     .prayer-card-title {
@@ -135,40 +314,69 @@
 
     .prayer-list {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      flex-direction: row;
+      gap: 10px;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    /* If the screen is narrow, allow wrapping so it doesn't overflow */
+    @media (max-width: 1200px) {
+      .prayer-list {
+        flex-wrap: wrap;
+      }
     }
 
     .prayer-row {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      padding: 14px 16px;
+      text-align: center;
+      padding: 12px 10px;
       border-radius: 10px;
       background: #f2f1e6;
       border: 1px solid #582f0c;
-      font-size: 1.35rem;
       color: #000000;
+      flex: 1 1 0;
+      min-width: 0;
     }
 
     .prayer-row-label {
-      font-weight: 700;
-      font-size: 1.35rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     .prayer-row-time {
       font-variant-numeric: tabular-nums;
-      font-weight: 700;
-      font-size: 1.35rem;
-      text-align: right;
+      font-weight: 800;
+      font-size: 1.2rem;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      line-height: 1.15;
+      align-items: center;
+      line-height: 1.1;
+      margin-top: 6px;
     }
 
     .prayer-row-time .iqamah-label {
-      text-align: right;
+      font-size: 0.7em;
+      font-weight: 600;
+      margin-top: 4px;
+      text-align: center;
+      display: block;
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     .prayer-row.next {
@@ -319,6 +527,12 @@
         width: 100%;
         height: 50vh;
       }
+      .bottom-prayer-area {
+        flex-direction: column;
+      }
+      .next-prayer-panel.bottom {
+        flex: 1 1 auto;
+      }
     }
   </style>
 </head>
@@ -335,20 +549,21 @@
           </div>
         </div>
 
-        <div class="prayer-card">
-          <div class="prayer-card-title">
-            <span>Today's Prayer Times</span>
-          </div>
-          <div class="method-text" id="methodText">Loading prayer times…</div>
-          <div class="prayer-list" id="prayerList">
-            <!-- Filled by JavaScript -->
-          </div>
-        </div>
+        <div class="donation-card" id="donationCard">
+          <div class="donation-title">Ramadan Iftar Donation Campaign</div>
+          <div class="donation-subtitle">Help sponsor iftar meals for our community this Ramadan.</div>
 
-        <div class="next-prayer-panel">
-          <div class="next-prayer-label">Countdown to Next Prayer</div>
-          <div class="next-prayer-countdown" id="nextPrayerCountdown">--:--:--</div>
-          <div class="next-prayer-text" id="nextPrayerPanel">Loading...</div>
+          <div class="donation-iframe-wrap" aria-label="Donation campaign widget">
+            <iframe
+              src="https://us.mohid.co/ga/atlanta/masjidannur/masjid/widget/api/index/?m=vfr&campaign_id=2349"
+              type="text/html"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              allowtransparency="true"
+              loading="lazy"
+            ></iframe>
+          </div>
         </div>
 
         <div class="footer">
@@ -368,9 +583,20 @@
         <img id="slideImage" src="" alt="Masjid announcement slide" />
       </div>
       <div class="slide-dots" id="slideDots"></div>
-      <div class="widget-box" id="widgetBox">
-        <script src="https://elfsightcdn.com/platform.js" async></script>
-        <div class="elfsight-app-ddda69fe-8123-465f-baab-168e90473277" data-elfsight-app-lazy></div>
+      <div class="bottom-prayer-area" id="bottomPrayerArea">
+        <div class="prayer-card bottom">
+          <div class="prayer-card-title">
+            <span>Today's Prayer Times</span>
+          </div>
+          <div class="method-text" id="methodText">Loading prayer times…</div>
+          <div class="prayer-list" id="prayerList"></div>
+        </div>
+
+        <div class="next-prayer-panel bottom">
+          <div class="next-prayer-label">Countdown to Next Prayer</div>
+          <div class="next-prayer-countdown" id="nextPrayerCountdown">--:--:--</div>
+          <div class="next-prayer-text" id="nextPrayerPanel">Loading...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -953,10 +1179,9 @@
       if (!isFriday(now)) return prayerObj;
       if (prayerObj.name !== "Dhuhr") return prayerObj;
 
-      // Friday override:
-      // Main row time (iqamah/base) = Jumu'ah Khutbah at 1:45 PM
+      // Jumu'ah prayer time (iqamah/base) 2:30 PM
       const iqamahStr = "13:45";
-      // Secondary line = Salah at 2:20 PM
+      // Khutbah start time shown as the "secondary" line 1:45 PM
       const khutbahStr = "14:20";
 
       // Build a new Date for 2:30 PM today (used for next-prayer detection + countdown)
@@ -967,10 +1192,10 @@
         ...prayerObj,
         // Internal canonical name stays Dhuhr, but displayName changes
         displayName: "Jumu'ah Khutbah",
-        // Secondary line becomes Salah time (instead of Adhan)
-        secondaryLabel: "Salah",
+        // Secondary line becomes khutbah start instead of adhan
+        secondaryLabel: "Jumu'ah Salah",
         secondaryTimeStr: khutbahStr,
-        // Base prayer time becomes 1:45 PM (Jumu'ah Khutbah)
+        // Base prayer time becomes 2:30 PM
         iqamahStr,
         // Keep adhanStr as the khutbah time so older code paths don't show "Adhan"
         adhanStr: khutbahStr,
