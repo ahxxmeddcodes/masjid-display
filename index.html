@@ -291,24 +291,12 @@
       opacity: 0;
     }
 
-    .slide-dots {
+    .slide-countdown {
       margin-top: 8px;
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      border: 1px solid #582f0c;
-      background: transparent;
-    }
-
-    .dot.active {
-      background: #582f0c;
-      border-color: #582f0c;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #000000;
     }
 
     @media (max-width: 900px) {
@@ -367,7 +355,7 @@
       <div class="slide-frame">
         <img id="slideImage" src="" alt="Masjid announcement slide" />
       </div>
-      <div class="slide-dots" id="slideDots"></div>
+      <div class="slide-countdown" id="slideCountdown">Next slide in 20s</div>
       <div class="widget-box" id="widgetBox">
         <script src="https://elfsightcdn.com/platform.js" async></script>
         <div class="elfsight-app-ddda69fe-8123-465f-baab-168e90473277" data-elfsight-app-lazy></div>
@@ -401,7 +389,7 @@
 ];
 
     // Time each slide is shown (in milliseconds)
-    const SLIDE_DURATION = 20000; // 20 seconds
+    const SLIDE_DURATION = 30000; // 30 seconds
 
     // Qur'an verses to rotate through on the right panel
     const QURAN_VERSES = [
@@ -1169,24 +1157,18 @@ setInterval(updateNextPrayerHighlight, 1000);
 
     let currentSlideIndex = 0;
     const slideImageEl = document.getElementById("slideImage");
-    const dotsContainer = document.getElementById("slideDots");
+    const slideCountdownEl = document.getElementById("slideCountdown");
+
+    let slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
 
     function initSlideshow() {
       if (!SLIDES || SLIDES.length === 0) {
         slideImageEl.alt = "No slides configured";
         return;
       }
-
-      // Create dots
-      dotsContainer.innerHTML = "";
-      SLIDES.forEach((_, index) => {
-        const dot = document.createElement("div");
-        dot.className = "dot" + (index === 0 ? " active" : "");
-        dotsContainer.appendChild(dot);
-      });
-
       // Show first slide
       slideImageEl.src = SLIDES[0];
+      updateSlideCountdown();
     }
 
     function showSlide(nextIndex) {
@@ -1200,23 +1182,31 @@ setInterval(updateNextPrayerHighlight, 1000);
       setTimeout(() => {
         slideImageEl.src = SLIDES[currentSlideIndex];
         slideImageEl.classList.remove("fade-out");
-        updateDots();
       }, 300);
     }
 
-    function updateDots() {
-      const dots = dotsContainer.querySelectorAll(".dot");
-      dots.forEach((dot, index) => {
-        dot.classList.toggle("active", index === currentSlideIndex);
-      });
+    function updateSlideCountdown() {
+      if (!slideCountdownEl) return;
+      slideCountdownEl.textContent = `Next slide in ${slideSecondsRemaining}s`;
     }
 
     function startSlideshow() {
       if (!SLIDES || SLIDES.length === 0) return;
+
       initSlideshow();
+      slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
+      updateSlideCountdown();
+
       setInterval(() => {
-        showSlide(currentSlideIndex + 1);
-      }, SLIDE_DURATION);
+        slideSecondsRemaining--;
+
+        if (slideSecondsRemaining <= 0) {
+          showSlide(currentSlideIndex + 1);
+          slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
+        }
+
+        updateSlideCountdown();
+      }, 1000);
     }
 
     function initQuranWidget() {
