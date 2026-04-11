@@ -333,12 +333,24 @@
       opacity: 0;
     }
 
-    .slide-countdown {
-      margin-top: 8px;
-      text-align: center;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #000000;
+    .slide-progress {
+      margin-top: 10px;
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(88,47,12,0.15);
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(88,47,12,0.18);
+    }
+
+    .slide-progress-bar {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: #582f0c;
+      transform-origin: left center;
+      transform: scaleX(1);
+      transition: transform 1s linear;
     }
 
     @media (max-width: 900px) {
@@ -397,7 +409,9 @@
       <div class="slide-frame">
         <img id="slideImage" src="" alt="Masjid announcement slide" />
       </div>
-      <div class="slide-countdown" id="slideCountdown">Next slide in 20s</div>
+      <div class="slide-progress" aria-label="Slide progress">
+        <div class="slide-progress-bar" id="slideProgressBar"></div>
+      </div>
       <div class="gallery-box" id="galleryBox">
         <div class="gallery-title">Masjid Gallery</div>
         <div class="gallery-track-wrapper">
@@ -1207,7 +1221,7 @@ setInterval(updateNextPrayerHighlight, 1000);
 
     let currentSlideIndex = 0;
     const slideImageEl = document.getElementById("slideImage");
-    const slideCountdownEl = document.getElementById("slideCountdown");
+    const slideProgressBarEl = document.getElementById("slideProgressBar");
 
     let slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
 
@@ -1218,7 +1232,7 @@ setInterval(updateNextPrayerHighlight, 1000);
       }
       // Show first slide
       slideImageEl.src = SLIDES[0];
-      updateSlideCountdown();
+      updateSlideProgress();
     }
 
     function showSlide(nextIndex) {
@@ -1235,9 +1249,10 @@ setInterval(updateNextPrayerHighlight, 1000);
       }, 300);
     }
 
-    function updateSlideCountdown() {
-      if (!slideCountdownEl) return;
-      slideCountdownEl.textContent = `Next slide in ${slideSecondsRemaining}s`;
+    function updateSlideProgress() {
+      if (!slideProgressBarEl) return;
+      const progress = Math.max(0, Math.min(1, slideSecondsRemaining / Math.floor(SLIDE_DURATION / 1000)));
+      slideProgressBarEl.style.transform = `scaleX(${progress})`;
     }
 
     function startSlideshow() {
@@ -1245,7 +1260,7 @@ setInterval(updateNextPrayerHighlight, 1000);
 
       initSlideshow();
       slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
-      updateSlideCountdown();
+      updateSlideProgress();
 
       setInterval(() => {
         slideSecondsRemaining--;
@@ -1255,7 +1270,7 @@ setInterval(updateNextPrayerHighlight, 1000);
           slideSecondsRemaining = Math.floor(SLIDE_DURATION / 1000);
         }
 
-        updateSlideCountdown();
+        updateSlideProgress();
       }, 1000);
     }
 
