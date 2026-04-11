@@ -97,14 +97,56 @@
       box-shadow: 0 14px 40px rgba(88,47,12,0.25);
     }
 
-    .widget-box {
+    .gallery-box {
       margin-top: 10px;
-      padding: 6px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 18px;
       background: #f2f1e6;
       box-shadow: 0 4px 12px rgba(88,47,12,0.12);
-      max-height: 250px;
+      height: 250px;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .gallery-track-wrapper {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      border-radius: 14px;
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: 10px;
+      height: 100%;
+      will-change: transform;
+      transition: transform 0.8s ease-in-out;
+    }
+
+    .gallery-item {
+      flex: 0 0 calc((100% - 40px) / 5);
+      height: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(88,47,12,0.08);
+      box-shadow: 0 4px 10px rgba(88,47,12,0.12);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .prayer-card-title {
@@ -356,9 +398,11 @@
         <img id="slideImage" src="" alt="Masjid announcement slide" />
       </div>
       <div class="slide-countdown" id="slideCountdown">Next slide in 20s</div>
-      <div class="widget-box" id="widgetBox">
-        <script src="https://elfsightcdn.com/platform.js" async></script>
-        <div class="elfsight-app-ddda69fe-8123-465f-baab-168e90473277" data-elfsight-app-lazy></div>
+      <div class="gallery-box" id="galleryBox">
+        <div class="gallery-title">Masjid Gallery</div>
+        <div class="gallery-track-wrapper">
+          <div class="gallery-track" id="galleryTrack"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -388,8 +432,14 @@
   // Add more file paths here
 ];
 
+    const GALLERY_IMAGES = [
+      ...Array.from({ length: 90 }, (_, i) => `gallery/image${i + 1}.jpg`)
+    ];
+
     // Time each slide is shown (in milliseconds)
     const SLIDE_DURATION = 30000; // 30 seconds
+    const GALLERY_ROTATE_INTERVAL = 3000;
+    const GALLERY_VISIBLE_COUNT = 5;
 
     // Qur'an verses to rotate through on the right panel
     const QURAN_VERSES = [
@@ -1209,6 +1259,53 @@ setInterval(updateNextPrayerHighlight, 1000);
       }, 1000);
     }
 
+    function initGallerySlider() {
+      const galleryTrack = document.getElementById("galleryTrack");
+      if (!galleryTrack || !GALLERY_IMAGES.length) return;
+
+      const images = GALLERY_IMAGES.concat(GALLERY_IMAGES.slice(0, GALLERY_VISIBLE_COUNT));
+      galleryTrack.innerHTML = "";
+
+      images.forEach((src, index) => {
+        const item = document.createElement("div");
+        item.className = "gallery-item";
+
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = `Masjid gallery image ${index + 1}`;
+
+        item.appendChild(img);
+        galleryTrack.appendChild(item);
+      });
+
+      let currentIndex = 0;
+      const gap = 10;
+
+      function moveGallery() {
+        const firstItem = galleryTrack.querySelector(".gallery-item");
+        if (!firstItem) return;
+
+        const itemWidth = firstItem.offsetWidth;
+        const offset = currentIndex * (itemWidth + gap);
+        galleryTrack.style.transform = `translateX(-${offset}px)`;
+      }
+
+      setInterval(() => {
+        currentIndex++;
+        moveGallery();
+
+        if (currentIndex >= GALLERY_IMAGES.length) {
+          setTimeout(() => {
+            galleryTrack.style.transition = "none";
+            currentIndex = 0;
+            moveGallery();
+            void galleryTrack.offsetWidth;
+            galleryTrack.style.transition = "transform 0.8s ease-in-out";
+          }, 850);
+        }
+      }, GALLERY_ROTATE_INTERVAL);
+    }
+
     function initQuranWidget() {
       const ayahEl = document.getElementById("quranAyah");
       const refEl = document.getElementById("quranRef");
@@ -1235,6 +1332,9 @@ setInterval(updateNextPrayerHighlight, 1000);
 
     // Start slideshow
     startSlideshow();
+
+    // Start gallery slider
+    initGallerySlider();
 
     // Start rotating Qur'an verses
     initQuranWidget();
