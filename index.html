@@ -9,6 +9,14 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html,
+    body,
+    .screen,
+    .screen *,
+    img,
+    div {
       cursor: none !important;
     }
 
@@ -1444,6 +1452,10 @@ setInterval(updateNextPrayerHighlight, 1000);
 
     // Start rotating Qur'an verses
     initQuranWidget();
+
+    // Keep cursor hidden on kiosk displays
+    document.documentElement.style.cursor = "none";
+    document.body.style.cursor = "none";
   </script>
 </body>
 </html>
